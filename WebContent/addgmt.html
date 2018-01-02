@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Upload GMT to database</title>
+</head>
+<body>
+<h2>GMT upload into database</h2>
+
+	<form action="uploadgmt" method="post" enctype="multipart/form-data">
+	<input type="hidden" name="mock" value="nothing"/>
+	<input type="text" name="gmtname" /> <- Name<br>
+    <input type="text" name="description" /> <- Description<br>
+    <input type="text" name="text" /> <- Text<br>
+    <input type="file" name="file" />
+    <input type="submit" />
+	</form>
+
+</body>
+</html>

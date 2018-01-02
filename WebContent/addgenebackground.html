@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Upload gene background to database</title>
+</head>
+<body>
+<h2>Gene background upload into database</h2>
+
+	<form action="uploadbackground" method="post" enctype="multipart/form-data">
+	<input type="hidden" name="mock" value="nothing"/>
+	<input type="text" name="backgroundname" /> <- Name<br>
+    <input type="text" name="description" /> <- Description<br>
+    <input type="file" name="file" />
+    <input type="submit" />
+	</form>
+
+</body>
+</html>
