@@ -4,7 +4,12 @@
 /GMTGeneList.class
 /GeneBackground.class
 /GeneList.class
-/SQLmanager.class
 /Test.class
 /UploadBackground.class
 /UploadGMT.class
+/SQLmanager.class
+/UploadUserList.class
+/LoginServlet.class
+/LogoutServlet.class
+/CreateUser.class
+/UserGeneList.class

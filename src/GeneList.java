@@ -1,11 +1,16 @@
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.util.HashMap;
 import java.util.HashSet;
 
 public class GeneList {
 
 	public HashSet<String> genes = new HashSet<String>();
+	public String[] genearray = new String[0];
 	public String description = "";
 	public String name = "";
 	public int id = 1;
@@ -22,6 +27,7 @@ public class GeneList {
 		name = _name;
 		description = _description;
 		genes = _genes;
+		genearray = genes.toArray(new String[0]);
 		hash = _gmthash;
 	}
 	
@@ -47,6 +53,52 @@ public class GeneList {
 			e.printStackTrace();
 		}
 		return hashtext;
+	}
+	
+	public HashMap<String, Integer> getGenemapping(){
+		// create the java statement and execute
+		HashSet<String> genemap = new HashSet<String>();
+		HashMap<String, Integer> genemapping = new HashMap<String, Integer>();
+		
+		try {
+			
+			String query = "SELECT * FROM genemapping";
+			
+			Statement stmt = connection.createStatement();
+			ResultSet rs = stmt.executeQuery(query);
+			
+			while (rs.next()){
+			    String gene = rs.getString("genesymbol");
+			    genemap.add(gene.toUpperCase());
+			}
+			stmt.close();
+			
+			HashSet<String> temp = new HashSet<String>(genes);
+			temp.removeAll(genemap);
+			
+			PreparedStatement pstmt = connection.prepareStatement("INSERT INTO genemapping (genesymbol) VALUES (?)");
+			String[] genearr = temp.toArray(new String[0]); 
+			
+			for(String g : genearr) {
+				pstmt.setString(1, g.toUpperCase());
+				pstmt.addBatch();
+			}
+			pstmt.executeBatch();
+			
+			query = "SELECT * FROM genemapping";
+			stmt = connection.createStatement();
+			rs = stmt.executeQuery(query);
+			
+			while (rs.next()){
+			    String gene = rs.getString("genesymbol");
+			    Integer geneid = rs.getInt("geneid");
+			    genemapping.put(gene.toUpperCase(), geneid);
+			}
+		}
+		catch(Exception e) {
+			e.printStackTrace();
+		}
+		return genemapping;
 	}
 	
 }

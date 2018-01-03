@@ -5,6 +5,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.util.HashMap;
 import java.util.HashSet;
 
 import javax.servlet.Servlet;
@@ -22,8 +23,11 @@ import javax.servlet.http.HttpServletResponse;
 public class EnrichmentCore extends HttpServlet {
 	private static final long serialVersionUID = 1L;
     public FastFisher f;
-	public HashSet<GMT> gmts;
 	
+	public boolean initialized = false;
+	
+	public HashSet<GMT> gmts;
+	public HashMap<String, GeneBackground> background;
 	
     /**
      * @see HttpServlet#HttpServlet()
@@ -42,8 +46,10 @@ public class EnrichmentCore extends HttpServlet {
 		f = new FastFisher(40000);
 		
 		System.out.println("Start buffering libraries");
+		long time = System.currentTimeMillis();
 		loadGMT();
-		System.out.println("GMTs loaded: "+gmts.size());		
+		loadBackground();
+		System.out.println("Background load: "+background.size()+"\nGMTs loaded: "+gmts.size()+"\nElapsed time: "+(System.currentTimeMillis() - time));		
 	}
 
 	/**
@@ -61,6 +67,40 @@ public class EnrichmentCore extends HttpServlet {
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		// TODO Auto-generated method stub
 		doGet(request, response);
+	}
+	
+	public void loadBackground() {
+		background = new HashMap<String, GeneBackground>();
+		HashSet<Integer> backgroundids = new HashSet<Integer>();
+		
+		SQLmanager sql = new SQLmanager();
+
+		Connection connection;
+
+		try { 
+			connection = DriverManager.getConnection("jdbc:mysql://"+sql.database, sql.user, sql.password);
+
+			// create the java statement and execute
+			String query = "SELECT id FROM genebackgroundinfo";
+			Statement stmt = connection.createStatement();
+			ResultSet rs = stmt.executeQuery(query);
+
+			while (rs.next()) {
+				int id = rs.getInt("id");
+				backgroundids.add(id);
+			}
+			stmt.close();
+			
+			for(Integer i : backgroundids) {
+				GeneBackground bg = new GeneBackground();
+		        bg.load(sql, (int)i);
+		        background.put(bg.name, bg);
+			}
+			
+		}
+		catch(Exception e) {
+			e.printStackTrace();
+		}
 	}
 	
 	public void loadGMT() {
@@ -95,5 +135,7 @@ public class EnrichmentCore extends HttpServlet {
 	        gmt.loadGMT(sql, (int)i);
 	        gmts.add(gmt);
 		}
+		
+		initialized = true;
 	}
 }

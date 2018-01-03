@@ -9,6 +9,10 @@ import java.util.HashSet;
 
 public class GeneBackground extends GeneList{
 	
+	public GeneBackground() {
+		
+	}
+	
 	public GeneBackground(int _id, String _name, String _description, String _gmthash, HashSet<String> _genes) {
 		id = _id;
 		name = _name;
@@ -20,53 +24,20 @@ public class GeneBackground extends GeneList{
 	public void write(SQLmanager _sql) {
 		sql = _sql;
 		Connection  connection;
-		HashSet<String> genemap = new HashSet<String>();
+		
 		try { 
 			connection = DriverManager.getConnection("jdbc:mysql://"+sql.database, sql.user, sql.password);
 
-			// create the java statement and execute
-			String query = "SELECT * FROM genemapping";
+			HashMap<String, Integer> genemapping = getGenemapping();
 			
-			Statement stmt = connection.createStatement();
-			ResultSet rs = stmt.executeQuery(query);
-			
-			while (rs.next()){
-			    String gene = rs.getString("genesymbol");
-			    genemap.add(gene);
-			}
-			stmt.close();
-			
-			HashSet<String> temp = new HashSet<String>(genes);
-			temp.removeAll(genemap);
-			
-			PreparedStatement pstmt = connection.prepareStatement("INSERT INTO genemapping (genesymbol) VALUES (?)");
-			String[] genearr = temp.toArray(new String[0]); 
-			
-			for(String g : genearr) {
-				pstmt.setString(1, g);
-				pstmt.addBatch();
-			}
-			pstmt.executeBatch();
-			
-			query = "SELECT * FROM genemapping";
-			stmt = connection.createStatement();
-			rs = stmt.executeQuery(query);
-			
-			HashMap<String, Integer> genemapping = new HashMap<String, Integer>();
-			while (rs.next()){
-			    String gene = rs.getString("genesymbol");
-			    Integer geneid = rs.getInt("geneid");
-			    genemapping.put(gene, geneid);
-			}
-			
-			pstmt = connection.prepareStatement("INSERT INTO genebackgroundinfo (listname, listdesc, hash) VALUES (?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
+			PreparedStatement pstmt = connection.prepareStatement("INSERT INTO genebackgroundinfo (listname, listdesc, hash) VALUES (?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
 			pstmt.setString(1, name);
 			pstmt.setString(2, description);
 			pstmt.setString(3, md5hash(Arrays.toString(genes.toArray(new String[0]))));
 			pstmt.addBatch();
 			pstmt.executeBatch();
 			
-			rs = pstmt.getGeneratedKeys();
+			ResultSet rs = pstmt.getGeneratedKeys();
 			int key = 0;
 			if (rs.next()) {
 			    key = rs.getInt(1);
@@ -88,8 +59,44 @@ public class GeneBackground extends GeneList{
 		
 	}
 	
-	public void load() {
+	public void load(SQLmanager _sql, int _id) {
+		sql = _sql;
+		id = _id;
 		
+		try { 
+			connection = DriverManager.getConnection("jdbc:mysql://"+sql.database, sql.user, sql.password);
+
+			// create the java statement and execute
+			String query = "SELECT * FROM genebackgroundinfo WHERE id='"+_id+"'";
+			Statement stmt = connection.createStatement();
+			ResultSet rs = stmt.executeQuery(query);
+			rs.next();
+			
+			name = rs.getString("listname");
+			description = rs.getString("listdesc");
+			hash = rs.getString("hash");
+			
+			stmt.close();
+			
+			// create the java statement and execute
+			query = "SELECT genemapping.genesymbol AS gene FROM gmtgenelist JOIN genemapping ON gmtgenelist.geneid = genemapping.geneid WHERE gmtgenelist.listid = '"+_id+"'";
+			stmt = connection.createStatement();
+			rs = stmt.executeQuery(query);
+			
+			genes = new HashSet<String>();
+			
+			// iterate through the java resultset
+			while (rs.next()){
+			    String gene = rs.getString("gene");
+			    genes.add(gene);
+			}
+			stmt.close();
+			
+			genearray = genes.toArray(new String[0]);
+		}
+		catch(Exception e) {
+			e.printStackTrace();
+		}
 	}
 	
 }
