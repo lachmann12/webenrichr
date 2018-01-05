@@ -14,7 +14,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-@WebServlet("/enrichment")
+@WebServlet("/enrichmentupload")
 
 public class UploadUserList extends HttpServlet {
     /**
@@ -69,8 +69,8 @@ public class UploadUserList extends HttpServlet {
 	        		genes.add(l);
 	        }
 	        
-	        UserGeneList list = new UserGeneList(key, description, "", genes);
-			list.write(id);
+	        UserGeneList list = new UserGeneList(key, description, genes);
+			//list.write(id);
 		}
 		catch(Exception e) {
 			e.printStackTrace();

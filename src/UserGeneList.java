@@ -1,10 +1,8 @@
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
 
 public class UserGeneList extends GeneList{
@@ -13,20 +11,20 @@ public class UserGeneList extends GeneList{
 		
 	}
 	
-	public UserGeneList(int _id, String _description, String _gmthash, HashSet<String> _genes) {
+	public UserGeneList(int _id, String _description, HashSet<String> _genes) {
 		id = _id;
 		description = _description;
 		genes = _genes;
-		hash = _gmthash;
+		genearray = genes.toArray(new String[0]);
+		hash = md5hash(Arrays.toString(genes.toArray(new String[0])));
 	}
 	
-	public void write(int _userid) {
-		
-		SQLmanager sql = new SQLmanager();
+	public void write(int _userid, EnrichmentCore _core, Connection _connection) {
+
 		int key = 0;
 
-		try { 
-			connection = DriverManager.getConnection("jdbc:mysql://"+sql.database, sql.user, sql.password);
+		try {
+			connection = _connection;
 
 			PreparedStatement pstmt = connection.prepareStatement("INSERT INTO usergenelistinfo (userid, description, hash) VALUES (?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
 			pstmt.setInt(1, _userid);
@@ -36,22 +34,22 @@ public class UserGeneList extends GeneList{
 			pstmt.executeBatch();
 			
 			ResultSet rs = pstmt.getGeneratedKeys();
-			key = 0;
+			id = 0;
 			if (rs.next()) {
-			    key = rs.getInt(1);
+			    id = rs.getInt(1);
 			}
 			
-			HashMap<String, Integer> genemapping = getGenemapping();
 			pstmt = connection.prepareStatement("INSERT INTO usergenelist (listid, geneid) VALUES (?, ?)");
 			
 			for(String g : genes) {
+				System.out.println(g);
 				pstmt.setInt(1, key);
-				pstmt.setInt(2, genemapping.get(g));
+				pstmt.setInt(2, _core.symbolToId.get(g));
 				pstmt.addBatch();
 			}
-			pstmt.executeBatch();
-			connection.close();
 			
+			pstmt.executeBatch();
+
 		}
 		catch(Exception e) {
 			e.printStackTrace();

@@ -1,5 +1,3 @@
-import java.math.BigInteger;
-import java.security.MessageDigest;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -11,21 +9,24 @@ import java.util.HashSet;
 
 public class GMTGeneList extends GeneList{
 	
+	public EnrichmentCore core;
 	
 	public GMTGeneList() {
 		
 	}
 	
-	public GMTGeneList(int _id, String _name, String _description, String _gmthash, HashSet<String> _genes) {
+	public GMTGeneList(int _id, String _name, String _description, HashSet<String> _genes) {
 		id = _id;
 		name = _name;
 		description = _description;
 		genes = _genes;
-		hash = _gmthash;
+		genearray = genes.toArray(new String[0]);
+		hash = md5hash(Arrays.toString(genes.toArray(new String[0])));
 	}
 	
-	public void loadGMTGeneList(Connection _sql, int _id) {
+	public void loadGMTGeneList(Connection _sql, int _id, EnrichmentCore _core) {
 		
+		core = _core;
 		connection = _sql;
 		id = _id;
 		
