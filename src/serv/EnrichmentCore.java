@@ -1,3 +1,4 @@
+package serv;
 
 
 import java.io.IOException;
@@ -91,10 +92,10 @@ public class EnrichmentCore extends HttpServlet {
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		HttpSession session = request.getSession(false);
-	    	String user = (String) session.getAttribute("user");
-	    	String role = (String) session.getAttribute("role");
-	    	
+		HttpSession session = request.getSession();
+		
+		String user = (String) session.getAttribute("user");
+		
 	    	String description = request.getParameter("description");
 		String genetext = request.getParameter("text");
 		
@@ -110,6 +111,7 @@ public class EnrichmentCore extends HttpServlet {
 			
 			
 			session.setAttribute("enrichment", enrichmentResult);
+			session.setAttribute("gmtinfo", gmts);
 			
 			System.out.println("Total time: "+(System.currentTimeMillis() - time));
 			connection.close();
@@ -132,7 +134,8 @@ public class EnrichmentCore extends HttpServlet {
 		int counter = 0;
 		for(GMT gmt : gmts) {
 			HashMap<Integer, Overlap> gmtenrichment = new HashMap<Integer, Overlap>();
-			for(GMTGeneList gmtlist : gmt.genelists) {
+			for(Integer gmtlistid : gmt.genelists.keySet()) {
+				GMTGeneList gmtlist = gmt.genelists.get(gmtlistid);
 				HashSet<String> overlap = new HashSet<String>();
 				if(_list.genearray.length < gmtlist.genearray.length) {
 					for(int i=0; i< _list.genearray.length; i++) {
@@ -163,7 +166,7 @@ public class EnrichmentCore extends HttpServlet {
 	    			Overlap over = new Overlap(overlap, pvalue);
 	    			gmtenrichment.put(gmtlist.id, over);
 			}
-			enrichment.put(gmt.id,gmtenrichment);
+			enrichment.put(gmt.id, gmtenrichment);
 			
 		}
 		
