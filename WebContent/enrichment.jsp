@@ -11,7 +11,7 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
-<title>Login Success Page</title>
+<title>Enrichment results</title>
 </head>
 <body>
 
@@ -48,12 +48,13 @@ for(Integer id : ids){
 	out.println("GMT: "+gmtset.get(id).id+" - "+gmtset.get(id).name+" - "+gmtset.get(id).description+"<br>");
 	out.println("<hr>");
 	
+	out.println("<table cellpadding='10px'><tr><th>Gene Set Name</th><th>Gene Set Size</th><th>Overlap</th><th>p-value</th></tr>");
 	for(Integer i : lids){
-		if(over.get(i).pval < 0.0001){
-			out.println(gmtset.get(id).genelists.get(i)+" - "+over.get(i).overlap.size()+" - "+over.get(i).pval+"<br>");
+		if(over.get(i).pval < 0.05){
+			out.println("<tr><td>"+gmtset.get(id).genelists.get(i).name+"</td><td>"+gmtset.get(id).genelists.get(i).genearray.length+"</td><td>"+over.get(i).overlap.size()+"</td><td>"+over.get(i).pval+"</td></tr>");
 		}
 	}
-	
+	out.println("</table>");
 }
 
 

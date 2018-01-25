@@ -4,7 +4,7 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
-<title>Login Success Page</title>
+<title>Enrichment</title>
 </head>
 <body>
 
@@ -12,7 +12,7 @@
 
 <hr>
 
-<h2>GMT upload into database</h2>
+<h2>Geneset Enrichment</h2>
 
 <form action="enrichment" method="post">
 <input type="hidden" name="mock" value="nothing"/>
